@@ -1,0 +1,77 @@
+'''k-d tree construction from wiki '''
+from collections import namedtuple
+from operator import itemgetter
+from pprint import pformat
+
+class Node(namedtuple("Node", "location left_child right_child")):
+    def __repr__(self):
+        return pformat(tuple(self))
+
+def kdtree(point_list, depth: int = 0):
+    if not point_list:
+        return None
+
+    k = len(point_list[0])  # assumes all points have the same dimension
+    # Select axis based on depth so that axis cycles through all valid values
+    axis = depth % k
+
+    # Sort point list by axis and choose median as pivot element
+    point_list.sort(key=itemgetter(axis))
+    median = len(point_list) // 2
+
+    # Create node and construct subtrees
+    return Node(
+        location=point_list[median],
+        left_child=kdtree(point_list[:median], depth + 1),
+        right_child=kdtree(point_list[median + 1 :], depth + 1),
+    )
+    
+''' k-d tree range search '''  
+def rangesearch(tree,area,depth:int = 0,count:int = 0,temp1:int=0,temp2:int=0):#area = [[xl,xr][y1,yr]...]
+    if not tree:
+        return count
+    k = len(tree[0])  # k is the demisision of the point.
+    axis = depth % k
+#     print(tree[0])
+#     print(depth)
+    if tree[0][axis]>=area[axis][0]: # left leaf
+        temp1 =  rangesearch(tree[1],area,depth+1,count)
+    if tree[0][axis]<=area[axis][1]: # right leaf
+        temp2 = rangesearch(tree[2],area,depth+1,count)
+    for i in range(k):
+        if not (tree[0][i]>area[i][0] and tree[0][i]<area[i][1]):
+            
+            break
+    else:
+        count = count + 1
+#         print(tree[0])  #用于测试
+#         print(count)    #用于测试
+        
+    return count  + temp1+temp2
+    
+ 
+ 
+'''先 生成尺度m=2的数，计算匹配数量Count， 尺度m=3同理'''
+#生成vectors 用于建造k-d tree  m=2 
+data = [0.9, 0.6, 0.5, 0.95, 0.85, 0.7, 0.8, 1.1, 0.7]
+list = []
+for i in range(len(data)-1):
+    list.append((data[i],data[i+1]))
+    
+'''  # m = 3
+data = [0.9, 0.6, 0.5, 0.95, 0.85, 0.7, 0.8, 1.1, 0.7]
+list = []
+for i in range(len(data)-2):
+    list.append((data[i],data[i+1],data[i+2]))    
+'''
+
+
+point_list = list
+tree = kdtree(point_list)
+r = 0.21
+Count = 0
+for i in point_list:
+    Count =Count + rangesearch(tree,[[i[0]-r,i[0]+r],[i[1]-r,i[1]+r]],count=0) - 1
+print(Count)
+
+'''有了匹配数量，SampEn就可以通过对数运算直接算了'''
