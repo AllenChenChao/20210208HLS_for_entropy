@@ -27,51 +27,54 @@ def kdtree(point_list, depth: int = 0):
     )
     
 ''' k-d tree range search '''  
-def rangesearch(tree,area,depth:int = 0,count:int = 0,temp1:int=0,temp2:int=0):#area = [[xl,xr][y1,yr]...]
+def rangesearch(tree,area,depth:int = 0,countLeft:int=0,countRight:int=0):#area = [[xl,xr][y1,yr]...]
     if not tree:
-        return count
+        return 0
     k = len(tree[0])  # k is the demisision of the point.
     axis = depth % k
+    count = 0
 #     print(tree[0])
 #     print(depth)
     if tree[0][axis]>=area[axis][0]: # left leaf
-        temp1 =  rangesearch(tree[1],area,depth+1,count)
+        countLeft =  rangesearch(tree[1],area,depth+1)
     if tree[0][axis]<=area[axis][1]: # right leaf
-        temp2 = rangesearch(tree[2],area,depth+1,count)
+        countRight = rangesearch(tree[2],area,depth+1)
     for i in range(k):
         if not (tree[0][i]>area[i][0] and tree[0][i]<area[i][1]):
             
             break
     else:
-        count = count + 1
+        count = 1
 #         print(tree[0])  #用于测试
 #         print(count)    #用于测试
         
-    return count  + temp1+temp2
+    return count  + countLeft + countRight
     
- 
- 
-'''先 生成尺度m=2的数，计算匹配数量Count， 尺度m=3同理'''
+
+'''计算样本熵'''
 #生成vectors 用于建造k-d tree  m=2 
-data = [0.9, 0.6, 0.5, 0.95, 0.85, 0.7, 0.8, 1.1, 0.7]
-list = []
-for i in range(len(data)-1):
-    list.append((data[i],data[i+1]))
-    
-'''  # m = 3
-data = [0.9, 0.6, 0.5, 0.95, 0.85, 0.7, 0.8, 1.1, 0.7]
-list = []
-for i in range(len(data)-2):
-    list.append((data[i],data[i+1],data[i+2]))    
-'''
-
-
-point_list = list
-tree = kdtree(point_list)
 r = 0.21
-Count = 0
-for i in point_list:
-    Count =Count + rangesearch(tree,[[i[0]-r,i[0]+r],[i[1]-r,i[1]+r]],count=0) - 1
-print(Count)
+data = [0.9, 0.6, 0.5, 0.95, 0.85, 0.7, 0.8, 1.1, 0.7]
+N = len(data)
+m = 2
+for m_copy in [m,m+1]:
+    list = []
+    for i in range(len(data)-m_copy+1):
+        list.append(tuple(data[i:i+m_copy]))
+#     print(list)
+    point_list = list
+    tree = kdtree(point_list)
+#     print(point_list)
+    Count = 0
 
-'''有了匹配数量，SampEn就可以通过对数运算直接算了'''
+    for i in point_list:
+        tempinvector = [[i[gg]-r,i[gg]+r] for gg in range(m_copy)]
+#         print(tempinvector)
+        Count =Count + rangesearch(tree,tempinvector) - 1
+    if m_copy == m:
+        B = Count/((N-m)*(N-m+1))
+    elif m_copy == m+1:
+        A = Count/((N-m-1)*(N-m))
+if A == 0: print(100)
+print(math.log(B/A))
+
