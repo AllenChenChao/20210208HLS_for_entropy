@@ -1,0 +1,102 @@
+import random
+import math
+import pandas as pd
+
+# a = [2,1,4,3,6,5,8,7]
+debug = False
+Loop = 5
+notch = 3
+a =     [x for x in range(2**Loop-notch)]
+location_a = [x for x in range(2**Loop-notch)]
+b =     [0 for x in range(2**Loop-notch)]
+location_b = [0 for x in range(2**Loop-notch)]
+if debug:print(len(a))
+random.shuffle(a)
+i = 0
+length = len(a)
+len_seg =1
+print(a)
+print(location_a)
+# a= [3,4,5,2,1]
+if debug:print(a)
+flag = 'a'
+for loop in range(Loop):   #layer depth 
+  if debug:print('loop: '+str(loop))
+  if debug:print('--------------------')
+  for iteration in range(math.ceil(length/len_seg/2)): #layer width and its iteration
+    i = 2*iteration*len_seg
+    j = 2*iteration*len_seg + len_seg
+    limit_i = 2*iteration*len_seg + len_seg
+    limit_j = 2*(iteration+1)*len_seg
+    if debug:print('itera i: '+str(i)+' j: '+str(j))
+    if debug:print('iteration: '+str(iteration))
+    if debug:print('*********************')
+    if flag == 'a':
+      while i < limit_i and i < length and j < limit_j and j < length:  
+        if a[i] < a[j]:
+          if debug:print('loop1 up i,j= '+str(i)+' '+str(j))
+          if debug:print('loop1 up-i+j-2*iteration*len_seg-len_seg')
+          if debug:print(i+j-2*iteration*len_seg-len_seg)
+          b[i+j-2*iteration*len_seg-len_seg] = a[i]
+          location_b[i+j-2*iteration*len_seg-len_seg] = location_a[i]
+          i = i + 1
+
+        else:
+          if debug:print('loop1 down i,j= '+str(i)+' '+str(j))
+          if debug:print('loop1 down-i+j-2*iteration*len_seg-len_seg')
+          if debug:print(i+j-2*iteration*len_seg-len_seg)
+          b[i+j-2*iteration*len_seg-len_seg] = a[j]
+          location_b[i+j-2*iteration*len_seg-len_seg] = location_a[j]
+          j = j + 1
+        if debug:print(a)
+        if debug:print(b)
+      while i < limit_i and i < length:
+        if debug:print('loop2 i,j= '+str(i)+' '+str(j))
+        if debug:print('loop2-i+j-2*iteration*len_seg-len_seg')
+        if debug:print(i+j-2*iteration*len_seg-len_seg)
+        b[i+j-2*iteration*len_seg-len_seg] = a[i]
+        location_b[i+j-2*iteration*len_seg-len_seg] = location_a[i]
+        i = i + 1
+        if debug:print(a)
+        if debug:print(b)
+      while j < limit_j and j < length:
+        if debug:print('loop3 i,j= '+str(i)+' '+str(j))
+        if debug:print('loop3-i+j-2*iteration*len_seg-len_seg')
+        if debug:print(i+j-2*iteration*len_seg-len_seg)
+        b[i+j-2*iteration*len_seg-len_seg] = a[j]
+        location_b[i+j-2*iteration*len_seg-len_seg] = location_a[j]
+        j = j + 1
+        if debug:print(a)
+        if debug:print(b)
+    else:
+      while i < limit_i and i < length and j < limit_j and j < length:  
+        if b[i] < b[j]:
+          a[i+j-2*iteration*len_seg-len_seg] = b[i]
+          location_a[i+j-2*iteration*len_seg-len_seg] = location_b[i]
+          i = i + 1
+        else:
+          a[i+j-2*iteration*len_seg-len_seg] = b[j]
+          location_a[i+j-2*iteration*len_seg-len_seg] = location_b[j]
+          j = j + 1
+      while i < limit_i and i < length:
+        if debug:print('i+j-2*iteration*len_seg-len_seg')
+        if debug:print(i+j-2*iteration*len_seg-len_seg)
+        a[i+j-2*iteration*len_seg-len_seg] = b[i]
+        location_a[i+j-2*iteration*len_seg-len_seg] = location_b[i]
+        i = i + 1
+      while j < limit_j and j < length:
+        a[i+j-2*iteration*len_seg-len_seg] = b[j]
+        location_a[i+j-2*iteration*len_seg-len_seg] = location_b[j]
+        j = j + 1
+  if flag == 'a':
+    flag = 'b'
+  else:
+    flag = 'a'
+  len_seg = 2*len_seg
+print('#####################')
+if Loop%2 == 0:
+  print(a)
+  print(location_a)
+else:
+  print(b)
+  print(location_b)
